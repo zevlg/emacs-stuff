@@ -1,0 +1,66 @@
+Collection of Emacs major/minor modes, utilities and other stuff that
+I've written.
+
+* wordfreq.el - provides simple interface:
+
+    (wordfreq-find "word")
+    ==> ("word" 336 275 0.0271)
+
+  Return word frequency index according to, i forgot which one,
+  criteria.
+
+* eukleides.el - Major mode/interface to A Euklidean Geometry Drawing
+  Language (http://www.eukleides.org/)
+
+  Lots of features, screenshot -
+  http://lgarc.narod.ru/pics/eukleides.png
+
+* sudoku.el - Simple yet powerful sudoku game.
+
+  Huge bunch of features, including game generation, puzzle editor,
+  step-by-step deducer, PostScript generator, etc etc.
+
+  Post about sudoku.el, with screenshots:
+  http://sxemacs-en.blogspot.com/2009/12/sudoku-for-sxemacs_27.html
+
+* wand-button.el - Nifty buttons generator.
+
+  Buttons generator using ffi-wand
+
+  http://sxemacs-en.blogspot.com/2009/12/buttons-generator_6806.html
+
+* wand-diagram.el - gnuplot like diagram generator.
+
+  Screenshot - http://lgarc.narod.ru/pics/wandiag1.png
+
+* himarks-mode.el - Minor mode to highlight markers in the buffer.
+
+* ofupd.el - One file updater.
+
+  Tracks remote file's version and updates it locally on request.
+  Example:
+
+    (ofupd-register "active-menu" "~/etp/active-menu.el"
+       "http://www.skamphausen.de/cgi-bin/ska/download/active-menu.el"
+       #'ofupd-ve-version-colon)
+
+* pegc-ffi.el - FFI to pegc library.  Example:
+
+  (let ((srules (pegc-intern-ruleset
+                 '((sentence (and (opt article) subject verb
+                                  (and (opt preposition) (opt article)
+                                       (or object (and object preposition)))))
+                   (article (and spaces (or (str "the") (str "an") (str "a"))))
+                   (preposition (and spaces (or (str "on") (str "at") (str "to")
+                                                (str "with"))))
+                   (subject (and spaces (or (str "man") (str "men") (str "dog")
+                                            (str "dogs") (str "cat"))))
+                   (verb (and spaces (or (str "sat") (str "saw") (str "shot")
+                                         (str "gave"))))
+                   (object (and spaces (or (str "cannon") (str "hat") (str "mat"))))
+                   ))))
+    (pegc-parse (pegc-create-parser "the cat sat on the hat") srules))
+  ==>
+  t
+
+... more stuff on the go ...

@@ -1,12 +1,12 @@
 ;;; sudoku.el -- Simple sudoku game, can download puzzles from the web.
 
-;; Copyright (C) 2009-2010 by Zajcev Evgeny.
+;; Copyright (C) 2009-2011 by Zajcev Evgeny.
 
 ;; Author: Zajcev Evgeny <zevlg@yandex.ru>
 ;; Created: Thu Oct 29 21:55:35 2009
 ;; Keywords: games
-;; URL: http://lgarc.narod.ru/xemacs/sudoku.el
-;; Version: 1.1
+;; URL: http://github.com/zevlg/emacs-stuff/blob/master/sudoku.el
+;; Version: 1.2
 
 ;; This file is NOT part of SXEmacs.
 
@@ -127,7 +127,8 @@
 ;;   (push '(sudoku-sdk-file-p . sudoku-load-puzzle-noselect)
 ;;         find-file-magic-files-alist)
 ;;
-;; this is SXEmacs only feature.
+;; this is SXEmacs only feature.  Others should be fine with classical
+;; (push '("\\.sdk$" . sudoku-mode) auto-mode-alist)
 
 ;; TODO
 ;; ~~~~

@@ -38,7 +38,8 @@
 ;;   * Step-by-step puzzle deduce (using S1, H1 and CC heuristics)
 ;;   * Nifty pencils (assist for Nishio, Cycles, Loops)
 ;;   * Undo/Redo operations
-;;   * Optimal puzzles generator (very straightforward, but usable)
+;;   * Optimal (single solution) puzzles generator (very
+;;     straightforward, but usable)
 ;;   * Board downloader (from websudoku.com and menneske.no)
 ;;   * Save/Load puzzles
 ;;   * Collection of built-in puzzles
@@ -327,6 +328,11 @@ Called with one argument - cell."
 (defsetf sudoku-puzzle-url (puzzle) (url)
   `(sudoku-puzzle-put ,puzzle :url ,url))
 
+(defun sudoku-puzzle-comment (puzzle)
+  (sudoku-puzzle-get puzzle :comment))
+(defsetf sudoku-puzzle-comment (puzzle) (level)
+  `(sudoku-puzzle-put ,puzzle :comment ,level))
+
 (defvar sudoku-mode nil)
 (make-variable-buffer-local 'sudoku-mode)
 
@@ -422,6 +428,7 @@ Called with one argument - cell."
     (define-key map [?h] 'sudoku-hint)
     (define-key map [?f] 'sudoku-puzzle-by-pid)
 
+    (define-key map [(control ?c) (control ?c)] 'sudoku-comment-puzzle)
     (define-key map [(control ?x) (control ?s)] 'sudoku-save-puzzle)
 
     ;; To avoid slippery fingers
@@ -461,6 +468,19 @@ Called with one argument - cell."
 
 ;;{{{ Sudoku command
 
+;; We don't need this function, however for sake of `C-h m' and
+;; auto-mode-alist we have it
+(defun sudoku-mode ()
+  "Major mode to solve sudoku puzzles.
+Entry to this mode runs the normal hook `sudoku-mode-hook'.
+Commands:
+\\{sudoku-mode-map}"
+  (interactive)
+  (if sudoku-puzzle
+      (sudoku-initialize sudoku-puzzle)
+    ;; Parse current file as SDK
+    (sudoku-load-puzzle (buffer-file-name (current-buffer)))))
+
 (defun sudoku (&optional arg)
   "Start playing sudoku.
 Avoid selecting already solved puzzle unless prefix ARG is specified."
@@ -485,7 +505,7 @@ Avoid selecting already solved puzzle unless prefix ARG is specified."
        (sudoku-make-puzzle
         (nth (mod (random t) (length nsp)) nsp))))))
 
-(defun sudoku-initialize (puzzle &optional no-select)
+(defun sudoku-initialize (puzzle &optional no-select puzzle-state)
   "Initialize and display PUZZLE."
   (with-current-buffer (get-buffer-create sudoku-buffer-name)
     (setq buffer-read-only nil)
@@ -524,6 +544,16 @@ Avoid selecting already solved puzzle unless prefix ARG is specified."
     ;; make buffer visible
     (unless no-select
       (switch-to-buffer (current-buffer)))
+
+    ;; Install the state
+    (when puzzle-state
+      (let ((st-board (sudoku-string-to-board puzzle-state)))
+        (sudoku-foreach-cell cc
+          (let ((ccval (sudoku-cell-num (sudoku-cell cc st-board))))
+            (unless (or (sudoku-cell-has-orig-value cc)
+                        (zerop ccval))
+              (sudoku-change-cell cc (sudoku-point-genprops ccval)))))
+        (sudoku-board-redraw)))
 
     (when (and (not (sudoku-custom-p))
                sudoku-autoinsert-mode)
@@ -1158,6 +1188,8 @@ Auto-insert does not work for pencils."
         (when (sudoku-puzzle-id sudoku-puzzle)
           (format "Puzzle ID: %s" (sudoku-pid-with-commas
                                    (sudoku-puzzle-id sudoku-puzzle))))
+        (when (sudoku-puzzle-comment sudoku-puzzle)
+          (format "Comment: %s" (sudoku-puzzle-comment sudoku-puzzle)))
         (format "Start hints: %d" (sudoku-board-hints
                              (sudoku-puzzle-board sudoku-puzzle)))
         (format "Cells to go: %d" (sudoku-remaining-cells))
@@ -1297,10 +1329,14 @@ Run tests to ensure that the change is a valid one."
         (sb (copy-tree sudoku-current-board)))
     (sudoku-test-and-change cell input)
     (sudoku-remove-autoinserted cell)
-    (run-hook-with-args 'sudoku-after-change-hook cell)
-    ;; Save SB for undo
-    (unless (equal sb sudoku-current-board)
-      (push sb sudoku-boards-stack))))
+    (unwind-protect
+        (run-hook-with-args 'sudoku-after-change-hook cell)
+      ;; Save SB for undo
+      (unless (equal sb sudoku-current-board)
+        (push sb sudoku-boards-stack)))
+
+    ;; Keep the cell position
+    (sudoku-goto-cell cell)))
 
 (defun sudoku-cell-erase (&optional cell)
   "Erase value at CELL.
@@ -1568,6 +1604,7 @@ Doesn't let you go outside the bounds of the board."
          (sud (with-temp-buffer
                 (if (fboundp 'url-retrieve)
                     (let ((url-working-buffer (current-buffer)))
+                      (declare (special url-working-buffer))
                       (url-retrieve source))
                   (call-process "curl" nil t nil "-s" source))
                 (goto-char (point-min))
@@ -1666,6 +1703,9 @@ Doesn't let you go outside the bounds of the board."
   (insert (format "Hints: %d\n" (sudoku-board-hints
                                  (sudoku-puzzle-board sudoku-puzzle))))
   (insert (format "Date: %s\n" (current-time-string)))
+  (when (sudoku-puzzle-comment sudoku-puzzle)
+    (insert (format "Comment: %s\n"
+                    (sudoku-puzzle-comment sudoku-puzzle))))
   (insert "\\end{verbatim}\n")
   (insert "\\hrule\n")
   (insert "\\end{document}\n")
@@ -1673,6 +1713,13 @@ Doesn't let you go outside the bounds of the board."
 
 ;;}}}
 ;;{{{ Saving/Loading sudoku files
+
+(defun sudoku-comment-puzzle (comment)
+  "Set comment for the puzzle."
+  (interactive (list (read-from-minibuffer
+                      "Comment: " (sudoku-puzzle-comment sudoku-puzzle))))
+  (setf (sudoku-puzzle-comment sudoku-puzzle) comment)
+  (sudoku-board-redraw))
 
 (defun sudoku-save-puzzle (file)
   "Save current puzzle to sdk FILE."
@@ -1697,6 +1744,8 @@ Doesn't let you go outside the bounds of the board."
         (insert "#U "
           (or (sudoku-puzzle-url sudoku-puzzle)
               "http://lgarc.narod.ru/xemacs/sudoku.el") "\r\n")
+        (when (sudoku-puzzle-comment sudoku-puzzle)
+          (insert "#C " (sudoku-puzzle-comment sudoku-puzzle) "\r\n"))
         (insert "#B " (format-time-string "%d/%m/%y") "\r\n")
         (insert (format "#H %d" (sudoku-board-hints in-board)) "\r\n")
         (insert "#L "
@@ -1744,7 +1793,7 @@ Can be used with `find-file-magic-files-alist'."
 (defun sudoku-load-puzzle (file &optional no-select)
   "Load sdk FILE."
   (interactive "FPuzzle file: ")
-  (let ((ppl (list :file file)) brd)
+  (let ((ppl (list :file file)) brd brd-state)
     (with-temp-buffer
       (insert-file-contents-literally file)
       (goto-char (point-min))
@@ -1753,19 +1802,28 @@ Can be used with `find-file-magic-files-alist'."
         (cond ((string= "L" (match-string 1))
                (setq ppl (plist-put ppl :level
                                     (intern (downcase (match-string 2))))))
+              ((string= "C" (match-string 1))
+               (setq ppl (plist-put ppl :comment (match-string 2))))
               ((string= "U" (match-string 1))
                (setq ppl (plist-put ppl :url (match-string 2)))))
         (forward-line))
-      (when (looking-at "\\[Puzzle\\]\r?$")
-        (forward-line))
-      ;; Parse board
-      (setq brd (loop for i from 0 below 9
+      ;; Parse board, puzzle itself and the state
+      (flet ((parse-board-inplace ()
+               (loop for i from 0 below 9
                   unless (looking-at "^[123456789.]\\{9,9\\}\r?$")
                   do (error "Invalid sdk file")
                   concat (subst-char-in-string
                           ?. ?0 (buffer-substring (point) (+ 9 (point))))
                   do (forward-line))))
-    (sudoku-initialize (sudoku-make-puzzle (cons brd ppl)) no-select)))
+        (when (looking-at "\\[Puzzle\\]\r?$")
+          (forward-line))
+        (setq brd (parse-board-inplace))
+        (when (looking-at "\\[State\\]\r?$")
+          (forward-line)
+          (setq brd-state (parse-board-inplace)))))
+
+    (sudoku-initialize (sudoku-make-puzzle (cons brd ppl))
+                       no-select brd-state)))
 
 (defun sudoku-load-puzzle-noselect (file)
   (sudoku-load-puzzle file t))

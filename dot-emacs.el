@@ -1766,6 +1766,9 @@ See `def-slime-selector-method' for defining new methods."
 (require 'browse-kill-ring)
 (browse-kill-ring-default-keybindings)
 
+;; Puts kills into X cutbuffer
+(add-hook 'kill-hooks 'x-store-cutbuffer)
+
 ;;; Erlang mode
 (autoload 'erlang-mode "erlang")
 (add-hook 'erlang-new-file-hook 'tempo-template-erlang-small-header)

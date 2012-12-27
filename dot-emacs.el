@@ -39,7 +39,7 @@
   (setq mule-retrieval-coding-system 'utf-8)
   )
 
-(load (expand-file-name "local.loadpath.el" user-init-directory))
+;;(load (expand-file-name "local.loadpath.el" user-init-directory))
 
 ;;{{{ `-- Presetup
 
@@ -53,7 +53,7 @@
 
 ;;; adjust load-path
 (push (expand-file-name "lisp" user-init-directory) load-path)
-(push (expand-file-name "lisp/myemacs" user-init-directory) load-path)
+(push (expand-file-name "lisp/emacs-stuff" user-init-directory) load-path)
 (push (expand-file-name "lisp/thirdpart" user-init-directory) load-path)
 (push (expand-file-name "~/dev/emacs") load-path)
 
@@ -217,7 +217,7 @@ If ARG is given then delete spaces only from right."
   (if (memq 'cyrillic-iso8859-5 (charsets-in-string string))
       "ru|en"
     "en|ru"))
-        
+       
 (defun google-translate-1 (string lang &optional ret)
   "Translate STRING to russian.
 If RET is specified, then only return the result."
@@ -286,7 +286,7 @@ If RET is specified, then only return the result."
 
       (set-window-text-height
        (selected-window) (1+ (count-lines (point-min) (point-max))))
-    
+   
       (run-hooks 'google-translate-mode)
       )))
 
@@ -2364,11 +2364,11 @@ Prefix ARG specifies number of weeks to highlight."
 (push '(("\\.el\\'" . "Emacs Lisp header")
         "Short description: "
         ";;; " (file-name-nondirectory (buffer-file-name)) " --- " str "
-        
+       
 ;; Copyright (C) "
         (substring (current-time-string) -4)
         " by Zajcev Evegny.
-        
+       
 ;; Author: Zajcev Evgeny <zevlg@yandex.ru>
 ;; Created: " (current-time-string) "
 ;; Keywords: "
@@ -2382,7 +2382,7 @@ Prefix ARG specifies number of weeks to highlight."
         ((let ((minibuffer-help-form v2))
            (completing-read "Keyword, C-h: " v1 nil t))
          str ", ") & -2 "
-         
+        
 ;; This file is part of SXEmacs.
 
 ;; SXEmacs is free software: you can redistribute it and/or modify
@@ -3347,7 +3347,7 @@ ARG is unused."
         ("SXEmacs-devel"
          (address "lg@sxemacs.org")
          (to "SXEmacs devel <sxemacs-devel@sxemacs.org>"))
-         
+        
         ("\\(xemacs-beta\\|SXEmacs-patches\\)"
          (address "lg@sxemacs.org"))
 
@@ -5151,8 +5151,8 @@ If prefix ARG is specified then use custom voice."
 
 ;; Finally load site local settings and some my passwords used by
 ;; Emacs
-(load (expand-file-name "local.settings.el" user-init-directory))
-(load (expand-file-name "local.passwords.el" user-init-directory))
+;(load (expand-file-name "local.settings.el" user-init-directory))
+;(load (expand-file-name "local.passwords.el" user-init-directory))
 
 ;; Enable UTF-8 encoding
 (setq buffer-file-coding-system-for-read 'utf-8)

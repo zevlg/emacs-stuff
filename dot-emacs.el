@@ -482,6 +482,31 @@ Or run `call-last-kbd-macro' otherwise."
 (put 'lg-nil-func 'isearch-command t)
 
 ;; Filling
+(defun lg-set-fill-prefix (arg)
+  "Set fill prefix from region or from the beginning of the line.
+If start/end points of the region resides in the same line, then set
+fill prefix from the region, otherwise do what `set-fill-prefix' does.
+Use prefix arg to cancel fill prefix at any point."
+  (interactive "P")
+  (cond (arg
+         (setq fill-prefix nil))
+
+        ((and (region-active-p)
+              (= 1 (count-lines (region-beginning) (region-end))))
+
+         (setq fill-prefix (buffer-substring (region-beginning) (region-end))))
+
+        (t 
+         (setq fill-prefix (buffer-substring
+                            (save-excursion (move-to-left-margin) (point))
+                            (point)))))
+  (when (equal fill-prefix "")
+    (setq fill-prefix nil))
+
+  (if fill-prefix
+      (message "fill-prefix: \"%s\"" fill-prefix)
+    (message "fill-prefix cancelled")))
+
 (defun lg-fill-paragraph-or-region (arg)
   "Temporary set fill column to ARG and `fill-paragraph-or-region'.
 If ARG is integer - `fill-paragraph-or-region' with ARG fill column.
@@ -4121,6 +4146,7 @@ If prefix ARG is specified, then replace region with the evaluation result."
 (define-key global-map (kbd "C-k") 'lg-kill-line)
 (define-key global-map (kbd "C-w") 'lg-kill-region)
 (define-key global-map (kbd "M-q") 'lg-fill-paragraph-or-region)
+(define-key global-map (kbd "C-x .") 'lg-set-fill-prefix)
 
 ;; Mark operations
 (define-key global-map (kbd "C-SPC") 'himarks-set-mark-command)

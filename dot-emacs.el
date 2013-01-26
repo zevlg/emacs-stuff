@@ -11,7 +11,6 @@
 ;; http://www.csd.uu.se/~andersl/emacs.shtml - Latest included in
 ;; (S)XEmacs
 
-(setq debug-on-error t)
 ;;; Code:
 
 ;;; Mule
@@ -52,10 +51,10 @@
 (setq gc-cons-threshold 50000000)
 
 ;;; adjust load-path
+(push (expand-file-name "emacs-stuff" user-init-directory) load-path)
+(push (expand-file-name "emacs-stuff/thirdpart" user-init-directory) load-path)
 (push (expand-file-name "lisp" user-init-directory) load-path)
-(push (expand-file-name "lisp/emacs-stuff" user-init-directory) load-path)
 (push (expand-file-name "lisp/thirdpart" user-init-directory) load-path)
-(push (expand-file-name "~/dev/emacs") load-path)
 
 (push (expand-file-name "~/bin/") exec-path)
 
@@ -125,6 +124,7 @@ If prefix ARG is specified, switch in other window."
 
 (define-key global-map (kbd "M-<f3>") 'lg-switch-to-scratch)
 (define-key global-map (kbd "C-<f3>") 'lg-switch-to-scratch)
+(define-key global-map (kbd "C-c C-s") 'lg-switch-to-scratch)
 
 (defvar lg-long-line-column 80
   "*Lines longer than this supposed to be long.")
@@ -963,7 +963,7 @@ Prefix arg LUCK-ARG specifies luck parameter, default is 4."
 (autoload 'vvb-mode "vvb-mode" nil t)
 
 ;;; Make info looking nicer
-(load "gc-info.el")
+;(load "gc-info.el")
 
 ;;; Tramp configuration
 (require 'tramp)
@@ -2347,6 +2347,29 @@ Prefix ARG specifies number of weeks to highlight."
 
 (setq auto-mode-alist (cons '("\\.[mh]\\'" . objc-mode) auto-mode-alist))
 
+;; Compilation
+(defun lg-objc-compile ()
+  "Compile in parent directory."
+  (interactive)
+  ;; 1. Find a directory that contains Makefile
+  ;; 2. Run make -k on that directory
+  (flet ((has-makefile-p (x)
+           (file-exists-p (concat x "/Makefile")))
+         (parent-dir (x)
+           (file-name-directory (substring x 0 -1))))
+    (let ((cdir default-directory))
+      (while (and cdir (not (has-makefile-p cdir)))
+        (setq cdir (parent-dir cdir)))
+      (when cdir
+        ;; Found
+        (let ((default-directory cdir))
+          (set (make-local-variable 'compile-command) "make -k ")
+          (compile compile-command)
+          (setq compile-command nil))))))
+
+(push '(objc-mode lg-objc-compile kill-compilation) mode-compile-modes-alist)
+(push '(c-mode lg-objc-compile kill-compilation) mode-compile-modes-alist)
+
 ;; autoinserters
 (push '(("\\.[Hh]\\'" . "C header")
         (upcase (concat "_" (file-name-nondirectory
@@ -2614,8 +2637,8 @@ With prefix ARG, do not move the point."
 ;(modify-syntax-entry ?\_ "w" c-mode-syntax-table) ; make ?\_ to be part of a word in c-mode
 
 ;; My abbrevs and skeletons for C-mode
-(require 'mcskels "my-cskels")
-(define-key c-mode-map (kbd "s-i") mc-mode-map)
+;(require 'mcskels "my-cskels")
+;(define-key c-mode-map (kbd "s-i") mc-mode-map)
 
 ;;}}}
 ;;{{{   `-- GO language mode
@@ -2867,9 +2890,9 @@ If used with prefix arg, show cvs-diff buffer also."
 )
 ;;}}}
 ;;{{{   `-- EGG - Emacs Got Git
-(add-to-list 'load-path "~/.sxemacs/lisp/thirdpart/egg" t)
+(add-to-list 'load-path "~/.sxemacs/emacs-stuff/thirdpart/egg" t)
 
-(autoload 'egg-status "~/.sxemacs/lisp/thirdpart/egg/egg.el" nil t)
+(autoload 'egg-status "~/.sxemacs/emacs-stuff/thirdpart/egg/egg.el" nil t)
 
 ;;{{{   `-- PSVN - Subversion manager
 
@@ -3122,34 +3145,34 @@ ARG is unused."
 
 ;;{{{   `-- EICQ
 
-(require 'emchat)
-(autoload 'emchat-xwem-init "emchat-xwem")
+;(require 'emchat)
+;(autoload 'emchat-xwem-init "emchat-xwem")
 
-(setq emchat-user-alias "lg"
-      emchat-port 6667
-      emchat-coding-system 'windows-1251
-      emchat-buddy-window-width 10
-      emchat-log-fill-column 70
-      emchat-log-info-flag 'tail
-      emchat-log-buddy-status-flag nil
-      emchat-log-system-flag nil
-      emchat-log-filename (expand-file-name "~/.emchat/emchat-log")
-      emchat-auto-response-messages-p nil
-      emchat-track-enable t)
+;(setq emchat-user-alias "lg"
+;      emchat-port 6667
+;      emchat-coding-system 'windows-1251
+;      emchat-buddy-window-width 10
+;      emchat-log-fill-column 70
+;      emchat-log-info-flag 'tail
+;      emchat-log-buddy-status-flag nil
+;      emchat-log-system-flag nil
+;      emchat-log-filename (expand-file-name "~/.emchat/emchat-log")
+;      emchat-auto-response-messages-p nil
+;      emchat-track-enable t)
+;
+;(add-hook 'emchat-log-mode-hook 'lg-set-save-buffers-skip)
+;(add-hook 'emchat-log-mode-hook
+;          (lambda ()
+;            (set-buffer-file-coding-system 'koi8-r)))
 
-(add-hook 'emchat-log-mode-hook 'lg-set-save-buffers-skip)
-(add-hook 'emchat-log-mode-hook
-          (lambda ()
-            (set-buffer-file-coding-system 'koi8-r)))
-
-(setq emchat-xwem-osd-font
-      "-*-terminus-bold-r-*-*-*-640-*-*-*-*-koi8-r"
-      emchat-xwem-osd-colors
-      '(("^\\(kisa\\|shira\\|debil\\|zorg\\)$" . "red3")
-        ("^\\(iri\\|Lesik\\|JackalX\\)$" . "green3")
-        ("^karma$" . "yellow2")
-        (".*" . "magenta3"))
-      emchat-xwem-osd-coordinates '(100 . 800))
+;(setq emchat-xwem-osd-font
+;      "-*-terminus-bold-r-*-*-*-640-*-*-*-*-koi8-r"
+;      emchat-xwem-osd-colors
+;      '(("^\\(kisa\\|shira\\|debil\\|zorg\\)$" . "red3")
+;        ("^\\(iri\\|Lesik\\|JackalX\\)$" . "green3")
+;        ("^karma$" . "yellow2")
+;        (".*" . "magenta3"))
+;      emchat-xwem-osd-coordinates '(100 . 800))
 
 ;;}}}
 ;;{{{   `-- ERC
@@ -4336,6 +4359,7 @@ RATE - Repeat rate per second"
 (define-key global-map (kbd "C-c d d") 'dict)
 (define-key global-map (kbd "C-c d r") 'rdict)
 (define-key global-map (kbd "C-c d t") 'google-translate-region)
+(define-key global-map (kbd "C-c d p") 'py-shell)
 
 ;;}}}
 ;;{{{   `-- C-cf - Prefix for Finding commands
@@ -4985,7 +5009,6 @@ Return value:
 
 ;;}}}
 
-(when nil
 ;;{{{ `-- Faces Setup
 
 (set-face-font 'default "-*-terminus-medium-r-*-*-32-*-*-*-*-*-*-r")
@@ -4994,15 +5017,15 @@ Return value:
 (set-face-font 'bold "-*-terminus-bold-r-*-*-32-*-*-*-*-*-*-r")
 (set-face-font 'bold-italic "-*-terminus-bold-i-*-*-32-*-*-*-*-*-*-r")
 
-(set-face-font 'dired-face-directory "-*-terminus-bold-r-*-*-32-*-*-*-*-*-*-r")
+; (set-face-font 'dired-face-directory "-*-terminus-bold-r-*-*-32-*-*-*-*-*-*-r")
 
-(set-face-font 'info-heading "-*-terminus-bold-r-*-*-32-*-*-*-*-*-*-r")
-(set-face-font 'info-node "-*-terminus-bold-i-*-*-32-*-*-*-*-*-*-r")
-(set-face-font 'info-xref "-*-terminus-bold-r-*-*-32-*-*-*-*-*-*-r")
+; (set-face-font 'info-heading "-*-terminus-bold-r-*-*-32-*-*-*-*-*-*-r")
+; (set-face-font 'info-node "-*-terminus-bold-i-*-*-32-*-*-*-*-*-*-r")
+; (set-face-font 'info-xref "-*-terminus-bold-r-*-*-32-*-*-*-*-*-*-r")
 
-(set-face-font 'cvs-header-face "-*-terminus-bold-r-*-*-32-*-*-*-*-*-*-r")
-(set-face-font 'cvs-marked-face "-*-terminus-bold-r-*-*-32-*-*-*-*-*-*-r")
-(set-face-font 'cvs-msg-face "-*-terminus-medium-i-*-*-32-*-*-*-*-*-*-r")
+; (set-face-font 'cvs-header-face "-*-terminus-bold-r-*-*-32-*-*-*-*-*-*-r")
+; (set-face-font 'cvs-marked-face "-*-terminus-bold-r-*-*-32-*-*-*-*-*-*-r")
+; (set-face-font 'cvs-msg-face "-*-terminus-medium-i-*-*-32-*-*-*-*-*-*-r")
 
 (make-face 'diary-face)
 (set-face-background 'diary-face "red")
@@ -5015,10 +5038,10 @@ Return value:
 
 (set-face-font 'font-lock-warning-face "-*-terminus-bold-r-*-*-32-*-*-*-*-*-*-r")
 
-(set-face-font 'slime-inspector-value-face "-*-terminus-bold-r-*-*-32-*-*-*-*-*-*-r")
-(set-face-font 'slime-reader-conditional-face "-*-terminus-bold-r-*-*-32-*-*-*-*-*-*-r")
-(set-face-font 'slime-repl-input-face "-*-terminus-bold-r-*-*-32-*-*-*-*-*-*-r")
-(set-face-font 'slime-repl-output-mouseover-face "-*-terminus-bold-r-*-*-32-*-*-*-*-*-*-r")
+; (set-face-font 'slime-inspector-value-face "-*-terminus-bold-r-*-*-32-*-*-*-*-*-*-r")
+; (set-face-font 'slime-reader-conditional-face "-*-terminus-bold-r-*-*-32-*-*-*-*-*-*-r")
+; (set-face-font 'slime-repl-input-face "-*-terminus-bold-r-*-*-32-*-*-*-*-*-*-r")
+; (set-face-font 'slime-repl-output-mouseover-face "-*-terminus-bold-r-*-*-32-*-*-*-*-*-*-r")
 
 (require 'cus-edit)
 (set-face-font 'custom-button-face "-*-terminus-bold-r-*-*-32-*-*-*-*-*-*-r")
@@ -5035,7 +5058,6 @@ Return value:
                                     erc-nick-msg-face erc-notice-face))))
 
 ;;}}}
-)
 
 ;;; Mac OS X specifics
 (when (eq system-type 'darwin)
@@ -5174,6 +5196,41 @@ If prefix ARG is specified then use custom voice."
   (when (buffer-live-p lsf-buffer)
     (with-current-buffer lsf-buffer
       (save-buffer))))
+
+
+;; Tottaly ignore mouse events
+(defcustom ignore-mouse-modes-with-mouse '(Wand-mode)
+  "Modes for whith mouse is enabled.")
+
+(defun ignore-mouse-pre-command ()
+  "Function for `pre-command-hook' to ignore mouse-events."
+  (when (and (eventp last-command-event)
+             (memq (event-type last-command-event)
+                   '(button-press button-release))
+             (not (memq major-mode ignore-mouse-modes-with-mouse)))
+    (setq this-command #'ignore)))
+
+(add-hook 'pre-command-hook 'ignore-mouse-pre-command)
+
+
+;;; Open binary files in hexl-mode
+(defun lg-hexl-file-p (file)
+  "Return non-nil if FILE is binary data."
+  (string= (magic:file-type file) "data"))
+
+(defun lg-hexl-mode-noselect (file)
+  "Open FILE in hexl-mode."
+  (let ((find-file-magic-files-alist nil))
+    (with-current-buffer (find-file-noselect file nil 't)
+      (unless (eq major-mode 'hexl-mode)
+        (hexl-mode))
+      (current-buffer))))
+
+;; Appends to `find-file-magic-files-alist', so other magic handlers
+;; for binary files are examined first
+(add-to-list 'find-file-magic-files-alist
+             '(lg-hexl-file-p . lg-hexl-mode-noselect) t)
+
 
 ;; Finally load site local settings and some my passwords used by
 ;; Emacs
@@ -5184,9 +5241,9 @@ If prefix ARG is specified then use custom voice."
 (setq buffer-file-coding-system-for-read 'utf-8)
 
 ;; Load lg's default desktop only for xwem sxemacs instance
-(when sxemacs-under-xwem
+;(when sxemacs-under-xwem
   (lg-desktop-load)
-)
+;)
 (message (format "%s loaded" user-init-file))
 
 ;; Select *scratch-file* to be active buffer

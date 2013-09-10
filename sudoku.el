@@ -150,8 +150,9 @@
 (defgroup sudoku nil
   "Sudoku - web-enabled puzzle game"
   :group  'games
-  :version "1.0"
-  :link '(url-source "http://lgarc.narod.ru/xemacs/sudoku.el")
+  :version "1.2"
+  :link '(url-link :tag "sudoku.el sources at github"
+                   "http://github.com/zevlg/emacs-stuff/blob/master/sudoku.el")
   :prefix "sudoku-")
 
 (defcustom sudoku-level 'easy

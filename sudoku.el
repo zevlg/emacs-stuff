@@ -2055,6 +2055,6 @@ And append them into built-in puzzles table."
 
 ;;}}}
 
-(provide 'sudoku) nil
+(provide 'sudoku)
 
-;;; sudoku.el  nilends here
+;;; sudoku.el ends here

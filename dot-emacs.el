@@ -30,7 +30,7 @@
   (setq coding-system-for-write 'utf-8)
 
 ;   (require 'quail-dvorak-jcuken
-; 	   (expand-file-name "quail-dvorak-jcuken.el" user-init-directory))
+;	   (expand-file-name "quail-dvorak-jcuken.el" user-init-directory))
 ;   (setq default-input-method "cyrillic-dvorak")
 
   (setq keyboard-coding-system 'iso-8859-1)
@@ -200,10 +200,10 @@ If ARG is given then delete spaces only from right."
      (concat "http://www.google.ru/search?q="
              (w3m-url-encode-string (encode-coding-string string 'utf-8))
              "&ie=UTF-8"))
-    (if (and (re-search-forward "/images/calc_img\\.gif" nil t)
-             (re-search-forward "<b>\\(.*\\)</b></h2>" nil t))
-        (setq res (replace-in-string
-                   (match-string 1) "<[^>]*>[^<]*</[^>]*>" ""))
+    (if (and (re-search-forward "/images/icons/onebox/calculator-40.gif" nil t)
+             (re-search-forward "<h2 class=\"r\"[^>]+>\\(.*\\)</h2>" nil t))
+        (setq res (w3m-decode-entities-string
+                   (replace-in-string (match-string 1) "<[^>]*>[^<]*</[^>]*>" "")))
       (setq res (format "No result (%s)" string)))
     (set-buffer-modified-p nil))
   (if ret
@@ -217,7 +217,7 @@ If ARG is given then delete spaces only from right."
   (if (memq 'cyrillic-iso8859-5 (charsets-in-string string))
       "ru|en"
     "en|ru"))
-       
+
 (defun google-translate-1 (string lang &optional ret)
   "Translate STRING to russian.
 If RET is specified, then only return the result."
@@ -286,7 +286,7 @@ If RET is specified, then only return the result."
 
       (set-window-text-height
        (selected-window) (1+ (count-lines (point-min) (point-max))))
-   
+
       (run-hooks 'google-translate-mode)
       )))
 
@@ -496,7 +496,7 @@ Use prefix arg to cancel fill prefix at any point."
 
          (setq fill-prefix (buffer-substring (region-beginning) (region-end))))
 
-        (t 
+        (t
          (setq fill-prefix (buffer-substring
                             (save-excursion (move-to-left-margin) (point))
                             (point)))))
@@ -929,7 +929,7 @@ Prefix arg LUCK-ARG specifies luck parameter, default is 4."
     (if (fboundp 'lisp-fill-paragraph)
         (nconc assoc-list
                (list (cons 'lisp-fill-paragraph
- 			   (symbol-function 'lisp-fill-paragraph)))))
+			   (symbol-function 'lisp-fill-paragraph)))))
     assoc-list )
   "Table containing the old function definitions that filladapt usurps.")
 
@@ -2412,11 +2412,11 @@ Prefix ARG specifies number of weeks to highlight."
 (push '(("\\.el\\'" . "Emacs Lisp header")
         "Short description: "
         ";;; " (file-name-nondirectory (buffer-file-name)) " --- " str "
-       
+
 ;; Copyright (C) "
         (substring (current-time-string) -4)
         " by Zajcev Evegny.
-       
+
 ;; Author: Zajcev Evgeny <zevlg@yandex.ru>
 ;; Created: " (current-time-string) "
 ;; Keywords: "
@@ -2430,7 +2430,7 @@ Prefix ARG specifies number of weeks to highlight."
         ((let ((minibuffer-help-form v2))
            (completing-read "Keyword, C-h: " v1 nil t))
          str ", ") & -2 "
-        
+
 ;; This file is part of SXEmacs.
 
 ;; SXEmacs is free software: you can redistribute it and/or modify
@@ -3395,7 +3395,7 @@ ARG is unused."
         ("SXEmacs-devel"
          (address "lg@sxemacs.org")
          (to "SXEmacs devel <sxemacs-devel@sxemacs.org>"))
-        
+
         ("\\(xemacs-beta\\|SXEmacs-patches\\)"
          (address "lg@sxemacs.org"))
 
@@ -4791,10 +4791,10 @@ I hate this color, so i wont forget to finish macro wheen needed.")
 
 ;; I'm from Ulyanovsk(Karamzin's birthplace), so I like YO symbol and
 ;; try widely use it.
-;; 
+;;
 ;; This is SXEmacs specific! uses ffi-sqlite to acces FTS3 virtual
 ;; tables.
-;; 
+;;
 ;; Some code taken from http://python.anabar.ru/macros/emin/yo/yo.el
 (defcustom yo-db-file (expand-file-name "yo.db" user-init-directory)
   "File with yo database.")
@@ -5247,7 +5247,7 @@ If prefix ARG is specified then use custom voice."
 (message (format "%s loaded" user-init-file))
 
 ;; Select *scratch-file* to be active buffer
-(add-hook 'window-setup-hook 
+(add-hook 'window-setup-hook
           (lambda () (pop-to-buffer "*scratch-file*") (delete-other-windows)))
 
 ;; XXX remove this

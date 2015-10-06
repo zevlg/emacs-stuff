@@ -97,7 +97,7 @@
 ;; pretty trivial values into `evil' puzzles, but want to focus on
 ;; real problems.  You can toggle auto-insert mode while solving
 ;; puzzle with `a' key.
-;; 
+;;
 ;; To deduce next step using auto-inserters use `d' key.
 
 ;; Pencils
@@ -396,6 +396,8 @@ Called with one argument - cell."
     ;; Disabled in sudoku mode
     (define-key map "\C-v" 'sudoku-disabled-key)
     (define-key map "\M-v" 'sudoku-disabled-key)
+    (define-key map "\M-f" 'sudoku-disabled-key)
+    (define-key map "\M-b" 'sudoku-disabled-key)
     (define-key map [mouse-1] 'sudoku-disabled-key)
     (define-key map [down-mouse-1] 'sudoku-disabled-key)
     (define-key map [drag-mouse-1] 'sudoku-disabled-key)
@@ -1415,9 +1417,6 @@ victory, and then asks if you want to play again."
   ;; Save puzzle (in built-in format) to solved list
   (push (sudoku-puzzle-in-bif sudoku-puzzle)
         sudoku-solved-puzzles))
-;   (if (y-or-n-p "Start another puzzle? ")
-;       (sudoku)
-;     (sudoku-quit-immediately)))
 
 (defun sudoku-hint ()
   "Print possible values for current cell."
@@ -1554,7 +1553,7 @@ Doesn't let you go outside the bounds of the board."
 
 (defun sudoku-disabled-key ()
   (interactive)
-  (message "Disabled in Sudoku mode"))
+  (message "%s is disabled in sudoku-mode" (key-description (this-command-keys))))
 
 (defun sudoku-goto-center ()
   (interactive)

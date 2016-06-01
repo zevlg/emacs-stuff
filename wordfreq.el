@@ -27,7 +27,7 @@
 
 ;;; Commentary:
 
-;;
+;; [+] works with GNU Emacs
 
 ;;; Code:
 

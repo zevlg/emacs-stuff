@@ -1,29 +1,25 @@
-;;; wordfreq.el --- Get word's frequency of usage.
+;;; wordfreq.el --- Get word's frequency of usage
 
 ;; Copyright (C) 2006 by Zajcev Evgeny.
 
 ;; Author: Zajcev Evgeny <zevlg@yandex.ru>
-;; Keywords: edict
-;; X-CVS: $Id: wordfreq.el,v 1.3 2008/12/02 08:08:42 lg Exp $
+;; Created: 2006/12/02
+;; Keywords: dictionary
+;; Package-Requires: ((emacs "24"))
+;; Version: 0.1
 
-;; This file is NOT part of XEmacs.
-
-;; XEmacs is free software; you can redistribute it and/or modify it
-;; under the terms of the GNU General Public License as published by
-;; the Free Software Foundation; either version 2, or (at your option)
-;; any later version.
-
-;; XEmacs is distributed in the hope that it will be useful, but
-;; WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-;; General Public License for more details.
-
+;; This program is free software; you can redistribute it and/or
+;; modify it under the terms of the GNU General Public License
+;; as published by the Free Software Foundation; either version 3
+;; of the License, or (at your option) any later version.
+;;
+;; This program is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
+;;
 ;; You should have received a copy of the GNU General Public License
-;; along with XEmacs; see the file COPYING.  If not, write to the Free
-;; Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
-;; 02111-1307, USA.
-
-;;; Synched up with: Not in FSF
+;; along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 
